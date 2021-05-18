@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "description": "A blank schematics",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json --watch",
     "format": "prettier src/**/*.{ts,json,md} --write",
