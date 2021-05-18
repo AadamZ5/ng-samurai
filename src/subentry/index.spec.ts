@@ -25,7 +25,7 @@ const libOptions: LibraryOptions = {
 };
 
 const defaultOptions: any = {
-  name: 'path/to/customer'
+  name: 'test-library-item/ice-Cream-----machine-galore/cone-generator'
 };
 
 const collectionPath = path.join(__dirname, '../collection.json');
@@ -48,26 +48,36 @@ describe('generate-subentry', () => {
 
   it('should generate a CustomerComponent', async () => {
     const options = { ...defaultOptions };
+    const segments = options.name.split('/');
+    const expectedFile = segments[segments.length - 1];
 
     const tree = await runner.runSchematicAsync('generate-subentry', options, appTree).toPromise();
 
     expect(
-      tree.files.includes('/projects/some-lib/src/lib/path/to/customer/customer.component.ts')
+      tree.files.includes(`/projects/some-lib/src/lib/${options.name}/${expectedFile}.component.ts`)
     ).toBe(true);
   });
 
   it('should generate a CustomerModule and add a CustomerComponent', async () => {
     const options = { ...defaultOptions };
 
+    const segments = options.name.split('/');
+    const expectedFile = segments[segments.length - 1];
+    let v = expectedFile.split('-');
+    v.forEach((w: string, i: number) => {
+      v[i] = v[i][0].toUpperCase() + v[i].substring(1);
+    });
+    v = v.join('');
+
     const tree = await runner.runSchematicAsync('generate-subentry', options, appTree).toPromise();
 
     expect(
-      tree.files.includes('/projects/some-lib/src/lib/path/to/customer/customer.module.ts')
+      tree.files.includes(`/projects/some-lib/src/lib/${options.name}/${expectedFile}.module.ts`)
     ).toBe(true);
     expect(
       tree
-        .readContent('/projects/some-lib/src/lib/path/to/customer/customer.module.ts')
-        .includes('CustomerComponent')
+        .readContent(`/projects/some-lib/src/lib/${options.name}/${expectedFile}.module.ts`)
+        .includes(v)
     ).toBe(true);
   });
 
@@ -76,18 +86,19 @@ describe('generate-subentry', () => {
     const expectedContent = "export * from './public-api';\n";
 
     const tree = await runner.runSchematicAsync('generate-subentry', options, appTree).toPromise();
-    expect(tree.readContent('/projects/some-lib/src/lib/path/to/customer/index.ts')).toEqual(
+    expect(tree.readContent(`/projects/some-lib/src/lib/${options.name}/index.ts`)).toEqual(
       expectedContent
     );
   });
 
   it('should export the CustomerComponent and the CustomerModule from public-api', async () => {
     const options = { ...defaultOptions };
-    const expectedContent =
-      "export * from './customer.module';\nexport * from './customer.component';\n";
+    const segments = options.name.split('/');
+    const expectedFile = segments[segments.length - 1];
+    const expectedContent = `export * from './${expectedFile}.module';\nexport * from './${expectedFile}.component';\n`;
 
     const tree = await runner.runSchematicAsync('generate-subentry', options, appTree).toPromise();
-    expect(tree.readContent('/projects/some-lib/src/lib/path/to/customer/public-api.ts')).toEqual(
+    expect(tree.readContent(`/projects/some-lib/src/lib/${options.name}/public-api.ts`)).toEqual(
       expectedContent
     );
   });
@@ -105,7 +116,7 @@ describe('generate-subentry', () => {
 
     const tree = await runner.runSchematicAsync('generate-subentry', options, appTree).toPromise();
     expect(
-      JSON.parse(tree.readContent('/projects/some-lib/src/lib/path/to/customer/package.json'))
+      JSON.parse(tree.readContent(`/projects/some-lib/src/lib/${options.name}/package.json`))
     ).toEqual(expectedContent);
   });
 });
